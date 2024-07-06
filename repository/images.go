@@ -18,3 +18,37 @@ func UploadNewImage(dataImage structs.ImageInput) error {
 
 	return nil
 }
+
+func DeleteImage(id int) (models.Images, error) {
+	var image models.Images
+
+	if err := models.DB.Where("image_id = ?", id).First(&image).Error; err != nil {
+		return image, err
+	}
+
+	models.DB.Delete(&image)
+
+	return image, nil
+}
+
+func GetImageByID(id int) (models.Images, error) {
+	var image models.Images
+
+	if err := models.DB.Where("image_id = ?", id).First(&image).Error; err != nil {
+		return image, err
+	}
+
+	return image, nil
+}
+
+func DeleteImageByProductID(productID int) ([]models.Images, error) {
+	var images []models.Images
+
+	if err := models.DB.Where("product_id = ?", productID).Find(&images).Error; err != nil {
+		return images, err
+	}
+
+	models.DB.Delete(&images)
+
+	return images, nil
+}

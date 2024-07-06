@@ -22,6 +22,7 @@ type ProductInput struct {
 	CategoryID uint `json:"category_id"`
 	Description string `json:"description"`
 	Price uint `json:"price"`
+	UserID uint `json:"user_id"`
 }
 
 type ImageInput struct {

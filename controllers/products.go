@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"os"
 	"github.com/gin-gonic/gin"
 	"store-be-golang/helpers"
 	"store-be-golang/structs"
@@ -14,6 +15,22 @@ import (
 
 func CreateNewProduct(c *gin.Context) {
 	var input structs.ProductInput
+
+	tokenWithBearer := c.GetHeader("Authorization")
+
+	token, err := helpers.ExtractToken(tokenWithBearer)
+	if err != nil {
+		helpers.GeneralResponse(c, http.StatusBadRequest,false, err.Error(), nil, nil)
+		return
+	}
+
+	data, err := helpers.VerifyToken(token)
+	if err != nil {
+		helpers.GeneralResponse(c, http.StatusBadRequest,false, err.Error(), nil, nil)
+		return
+	}
+	
+	input.UserID = data.ID
 
 	categoryIDStr := c.PostForm("category_id")
 	description := c.PostForm("description")
@@ -40,8 +57,6 @@ func CreateNewProduct(c *gin.Context) {
 		helpers.GeneralResponse(c, http.StatusBadRequest,false, err.Error(), nil, nil)
 		return
 	}
-
-	fmt.Println(productID)
 
 	// Add images
 	form, _ := c.MultipartForm()
@@ -85,4 +100,95 @@ func GetAllProduct(c *gin.Context) {
 	}
 
 	helpers.GeneralResponse(c, http.StatusOK,true, "Data berhasil didapatkan", products, nil)
+}
+
+
+func EditProduct(c *gin.Context) {
+	var input structs.ProductInput
+
+	if err := c.ShouldBindJSON(&input); err != nil {
+		helpers.GeneralResponse(c, http.StatusBadRequest, false, err.Error(), nil, nil)
+		return
+	}
+
+	tokenWithBearer := c.GetHeader("Authorization")
+
+	token, err := helpers.ExtractToken(tokenWithBearer)
+	if err != nil {
+		helpers.GeneralResponse(c, http.StatusBadRequest,false, err.Error(), nil, nil)
+		return
+	}
+
+	dataUser, err := helpers.VerifyToken(token)
+	if err != nil {
+		helpers.GeneralResponse(c, http.StatusBadRequest,false, err.Error(), nil, nil)
+		return
+	}
+
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	product, err := repository.FindProductByID(id)
+
+	if err != nil {
+		helpers.GeneralResponse(c, http.StatusBadRequest, false, err.Error(), nil, nil)
+		return
+	}
+
+	if product.UserID != dataUser.ID {
+		helpers.GeneralResponse(c, http.StatusBadRequest, false, "Invalid Token", nil, nil)
+		return
+	}
+
+	err = repository.EditProduct(id, input)
+	if err != nil {
+		helpers.GeneralResponse(c, http.StatusBadRequest, false, err.Error(), nil, nil)
+		return
+	}
+
+	helpers.GeneralResponse(c, http.StatusOK, false, "Berhasil mengedit product", nil, nil)
+}
+
+func DeleteProduct(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	tokenWithBearer := c.GetHeader("Authorization")
+
+	token, err := helpers.ExtractToken(tokenWithBearer)
+	if err != nil {
+		helpers.GeneralResponse(c, http.StatusBadRequest,false, err.Error(), nil, nil)
+		return
+	}
+
+	dataUser, err := helpers.VerifyToken(token)
+	if err != nil {
+		helpers.GeneralResponse(c, http.StatusBadRequest,false, err.Error(), nil, nil)
+		return
+	}
+
+	product, err := repository.FindProductByID(id)
+	if dataUser.ID != product.UserID {
+		helpers.GeneralResponse(c, http.StatusBadRequest, false, "Invalid Token", nil, nil)
+		return
+	}
+
+	_, err = repository.DeleteProduct(id)
+	if err != nil {
+		helpers.GeneralResponse(c, http.StatusBadRequest, false, err.Error(), nil, nil)
+		return
+	}
+
+	imagesDeleted, err := repository.DeleteImageByProductID(id)
+	if err != nil {
+		helpers.GeneralResponse(c, http.StatusBadRequest, false, err.Error(), nil, nil)
+		return
+	}
+
+	for _, image := range imagesDeleted {
+		err = os.Remove("." + image.Url)
+		if err != nil {
+			helpers.GeneralResponse(c, http.StatusBadRequest, false, err.Error(), nil, nil)
+		}
+	}
+
+	helpers.GeneralResponse(c, http.StatusOK, true, "Product berhasil dihapus", nil, nil)
 }
