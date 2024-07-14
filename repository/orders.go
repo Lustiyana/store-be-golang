@@ -29,7 +29,7 @@ func UpdatePaymentStatus(dataUpdate structs.UpdatePaymentInput) (error) {
 	}
 
 	if err := models.DB.Model(&order).Updates(dataUpdate).Error; err != nil {
-		return err
+		return err 
 	}
 
 	return nil
