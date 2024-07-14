@@ -22,7 +22,7 @@ func CreateNewProduct(dataProduct structs.ProductInput) (uint, error) {
 
 func GetAllProduct() ([]models.Products, error) {
 	var products []models.Products
-  if err := models.DB.Preload("Images").Find(&products).Error; err != nil {
+  	if err := models.DB.Preload("Images").Find(&products).Error; err != nil {
 		return products, err
 	}
 

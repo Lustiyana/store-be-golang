@@ -23,10 +23,22 @@ type ProductInput struct {
 	Description string `json:"description"`
 	Price uint `json:"price"`
 	UserID uint `json:"user_id"`
+	ProductName string `json: "product_name"`
 }
 
 type ImageInput struct {
 	ProductID uint `json:"product_id"`
 	Alt string `json:"alt"`
 	Url string `json:"url"`
+}
+
+type OrderInput struct {
+	UserID uint `json:"user_id" binding:"required"`
+	Address string `json:"address" binding:"required"`
+	ProductID uint `json:"product_id" binding:"required"`
+}
+
+type UpdatePaymentInput struct {
+	OrderID uint `json:"order_id" binding:"required"`
+	PaymentStatus string `json:"payment_status" binding:"required"` 
 }

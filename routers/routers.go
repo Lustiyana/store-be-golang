@@ -25,5 +25,10 @@ func StartServer() *gin.Engine {
 	authGroup.POST("/images", controllers.UploadNewImage)
 	authGroup.DELETE("/images/:id", controllers.DeleteImage)
 
+	authGroup.GET("categories/:id", controllers.GetCategoryByID)
+	authGroup.GET("categories", controllers.GetAllCategories)
+
+	authGroup.POST("orders", controllers.CreateNewOrder)
+
 	return router
 }

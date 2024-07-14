@@ -33,6 +33,7 @@ func CreateNewProduct(c *gin.Context) {
 	input.UserID = data.ID
 
 	categoryIDStr := c.PostForm("category_id")
+	productName := c.PostForm("product_name")
 	description := c.PostForm("description")
 	priceStr := c.PostForm("price")
 
@@ -49,6 +50,7 @@ func CreateNewProduct(c *gin.Context) {
 	}
 
 	input.CategoryID = uint(categoryID)
+	input.ProductName = productName
 	input.Description = description
 	input.Price = uint(price)
 
@@ -95,8 +97,8 @@ func CreateNewProduct(c *gin.Context) {
 func GetAllProduct(c *gin.Context) {
 	products, err := repository.GetAllProduct()
 	if err != nil {
-		panic(err)
 		helpers.GeneralResponse(c, http.StatusBadRequest,false, err.Error(), nil, nil)
+		return
 	}
 
 	helpers.GeneralResponse(c, http.StatusOK,true, "Data berhasil didapatkan", products, nil)
