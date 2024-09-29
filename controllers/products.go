@@ -84,7 +84,7 @@ func CreateNewProduct(c *gin.Context) {
 			Url: imageURL,
 		}
 
-		err := repository.UploadNewImage(dataImage)
+		_, err := repository.UploadNewImage(dataImage)
 		if err != nil {
 			helpers.GeneralResponse(c, http.StatusBadRequest,false, err.Error(), nil, nil)
 			return
@@ -96,6 +96,26 @@ func CreateNewProduct(c *gin.Context) {
 
 func GetAllProduct(c *gin.Context) {
 	products, err := repository.GetAllProduct()
+	if err != nil {
+		helpers.GeneralResponse(c, http.StatusBadRequest,false, err.Error(), nil, nil)
+		return
+	}
+
+	helpers.GeneralResponse(c, http.StatusOK,true, "Data berhasil didapatkan", products, nil)
+}
+
+func GetMyProducts(c *gin.Context) {
+	tokenWithBearer := c.GetHeader("Authorization")
+
+	token, err := helpers.ExtractToken(tokenWithBearer)
+	if err != nil {
+		helpers.GeneralResponse(c, http.StatusBadRequest,false, err.Error(), nil, nil)
+		return
+	}
+
+	dataUser, err := helpers.VerifyToken(token)
+
+	products, err := repository.GetProductsByUserID(dataUser.ID)
 	if err != nil {
 		helpers.GeneralResponse(c, http.StatusBadRequest,false, err.Error(), nil, nil)
 		return
@@ -193,4 +213,17 @@ func DeleteProduct(c *gin.Context) {
 	}
 
 	helpers.GeneralResponse(c, http.StatusOK, true, "Product berhasil dihapus", nil, nil)
+}
+
+func ProductDetail(c *gin.Context) {
+	id, _ := strconv.Atoi(c.Param("id"))
+
+	product, err := repository.FindProductByID(id)
+	
+	if err != nil {
+		helpers.GeneralResponse(c, http.StatusBadRequest, false, err.Error(), nil, nil)
+		return
+	}
+
+	helpers.GeneralResponse(c, http.StatusOK, true, "Detail produk berhasil didapatkan", product, nil)
 }

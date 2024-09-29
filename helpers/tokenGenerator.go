@@ -5,21 +5,14 @@ import (
 	"time"
 	"net/http"
 	"strings"
-
+	"store-be-golang/structs"
 	"github.com/dgrijalva/jwt-go"
 )
 
 var jwtKey = []byte("1NIP45SW0RD")
 
-type Claims struct {
-	ID uint `json:"id"`
-	Email string `json:"email"`
-	Password string `json:"password"`
-	jwt.StandardClaims
-}
-
 func GenerateToken(id uint, email string, password string) (string, error) {
-	claims := &Claims{
+	claims := &structs.Claims{
 		ID: id,
 		Email: email,
 		Password: password,
@@ -39,8 +32,8 @@ func GenerateToken(id uint, email string, password string) (string, error) {
 	return tokenString, nil
 }
 
-func VerifyToken(tokenString string) (*Claims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+func VerifyToken(tokenString string) (*structs.Claims, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &structs.Claims{}, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
 	})
 
@@ -48,7 +41,7 @@ func VerifyToken(tokenString string) (*Claims, error) {
 		return nil, err
 	}
 
-	claims, ok := token.Claims.(*Claims)
+	claims, ok := token.Claims.(*structs.Claims)
 	if !ok || !token.Valid {
 		return nil, fmt.Errorf("Invalid token")
 	}

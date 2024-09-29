@@ -3,6 +3,8 @@ package repository
 import (
 	"store-be-golang/models"
 	"store-be-golang/structs"
+	"errors"
+	"gorm.io/gorm"
 )
 
 func CreateNewProduct(dataProduct structs.ProductInput) (uint, error) {
@@ -11,6 +13,7 @@ func CreateNewProduct(dataProduct structs.ProductInput) (uint, error) {
 		Price: dataProduct.Price,
 		Description: dataProduct.Description,
 		UserID: dataProduct.UserID,
+		ProductName: dataProduct.ProductName,
 	}
 
 	if err := models.DB.Create(&product).Error; err != nil {
@@ -29,14 +32,35 @@ func GetAllProduct() ([]models.Products, error) {
 	return products, nil
 }
 
+func GetProductsByUserID(userID uint) ([]models.Products, error) {
+	var products []models.Products
+
+	if err := models.DB.Preload("Images").Where("user_id = ?", userID).Find(&products).Error; err != nil {
+		return products, err
+	}
+
+	return products, nil
+}
+
 func FindProductByID(id int) (models.Products, error) {
 	var product models.Products
 
-	if err := models.DB.Where("product_id = ?", id).First(&product).Error; err != nil {
+	if err := models.DB.Preload("Images").Where("product_id = ?", id).First(&product).Error; err != nil {
 		return product, err
 	}
 
 	return product, nil
+}
+
+func CheckSellerProduct(productID int, userID int) (bool) {
+	var product models.Products
+	
+	err := models.DB.Where("product_id = ? AND user_id = ?", productID, userID).First(&product).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return false
+	}
+
+	return true
 }
 
 func EditProduct(id int, dataProduct structs.ProductInput) (error) {

@@ -14,7 +14,6 @@ func Register(c *gin.Context) {
 
 	if err := c.ShouldBindJSON(&dataUser); err != nil {
 		helpers.GeneralResponse(c, http.StatusBadRequest,false, err.Error(), nil, nil)
-		panic(err)
 		return
 	}
 

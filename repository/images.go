@@ -5,7 +5,7 @@ import (
 	"store-be-golang/structs"
 )
 
-func UploadNewImage(dataImage structs.ImageInput) error {
+func UploadNewImage(dataImage structs.ImageInput) (models.Images, error) {
 	image := models.Images{
 		ProductID: dataImage.ProductID,
 		Alt: dataImage.Alt,
@@ -13,10 +13,10 @@ func UploadNewImage(dataImage structs.ImageInput) error {
 	}
 
 	if err := models.DB.Create(&image).Error; err != nil {
-		return err
+		return image, err
 	}
 
-	return nil
+	return image, nil
 }
 
 func DeleteImage(id int) (models.Images, error) {

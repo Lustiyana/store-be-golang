@@ -12,6 +12,12 @@ import(
 func CreateNewOrder(c *gin.Context) {
 	var input structs.OrderInput
 
+	if err := c.ShouldBindJSON(&input); err != nil {
+		panic(err)
+		helpers.GeneralResponse(c, http.StatusBadRequest, false, err.Error(), nil, nil)
+		return
+	}
+
 	tokenWithBearer := c.GetHeader("Authorization")
 
 	token, err := helpers.ExtractToken(tokenWithBearer)
@@ -25,13 +31,7 @@ func CreateNewOrder(c *gin.Context) {
 		helpers.GeneralResponse(c, http.StatusBadRequest,false, err.Error(), nil, nil)
 		return
 	}
-	
-	address := c.PostForm("address")
 
-	productID, _ := strconv.ParseUint(c.PostForm("product_id"), 10, 64)
-
-	input.Address = address
-	input.ProductID = uint(productID)
 	input.UserID = dataUser.ID
 
 	err = repository.CreateNewOrder(input)
@@ -59,4 +59,24 @@ func UpdatePaymentStatus(c *gin.Context) {
 	}
 
 	helpers.GeneralResponse(c, http.StatusOK,true, "Payment berhasil diupdate", nil, nil)
+}
+
+func GetAllOrders(c *gin.Context) {
+	tokenWithBearer := c.GetHeader("Authorization")
+
+	token, err := helpers.ExtractToken(tokenWithBearer)
+	if err != nil {
+		helpers.GeneralResponse(c, http.StatusBadRequest,false, err.Error(), nil, nil)
+		return
+	}
+
+	dataUser, err := helpers.VerifyToken(token)
+
+	orders, err := repository.GetAllOrders(dataUser.ID)
+	if err != nil {
+		helpers.GeneralResponse(c, http.StatusBadRequest,false, err.Error(), nil, nil)
+		return
+	}
+
+	helpers.GeneralResponse(c, http.StatusOK,true, "OK", orders, nil)
 }

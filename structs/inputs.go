@@ -23,7 +23,7 @@ type ProductInput struct {
 	Description string `json:"description"`
 	Price uint `json:"price"`
 	UserID uint `json:"user_id"`
-	ProductName string `json: "product_name"`
+	ProductName string `json:"product_name"`
 }
 
 type ImageInput struct {
@@ -33,7 +33,7 @@ type ImageInput struct {
 }
 
 type OrderInput struct {
-	UserID uint `json:"user_id" binding:"required"`
+	UserID uint `json:"user_id"`
 	Address string `json:"address" binding:"required"`
 	ProductID uint `json:"product_id" binding:"required"`
 }
@@ -41,4 +41,11 @@ type OrderInput struct {
 type UpdatePaymentInput struct {
 	OrderID uint `json:"order_id" binding:"required"`
 	PaymentStatus string `json:"payment_status" binding:"required"` 
+}
+
+type CartInput struct {
+	CartItemID uint `json:"cart_item_id" gorm:"primaryKey"`
+	UserID uint `json:"user_id"`
+	ProductID uint `json:"product_id"`
+	Quantity uint `json:"quantity"`
 }

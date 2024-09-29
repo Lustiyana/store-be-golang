@@ -56,13 +56,13 @@ func UploadNewImage(c *gin.Context) {
 		Url: imageURL,
 	}
 
-	err = repository.UploadNewImage(dataImage)
+	image,err := repository.UploadNewImage(dataImage)
 	if err != nil {
 		helpers.GeneralResponse(c, http.StatusBadRequest, false, err.Error(), nil, nil)
 		return
 	}
 
-	helpers.GeneralResponse(c, http.StatusOK, true, "Gambar berhasil ditambahkan", nil, nil)
+	helpers.GeneralResponse(c, http.StatusOK, true, "Gambar berhasil ditambahkan", image, nil)
 }
 
 func DeleteImage(c *gin.Context) {
